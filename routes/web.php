@@ -10,6 +10,9 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+use App\Http\Controllers\SeriesController;
+
 Route::get('/series', 'SeriesController@index')
     ->name('listar_series');
 Route::get('/series/criar', 'SeriesController@create')
@@ -17,3 +20,4 @@ Route::get('/series/criar', 'SeriesController@create')
 Route::post('/series/criar', 'SeriesController@store');
 Route::delete('/series/{id}', 'SeriesController@destroy');
 Route::get("/series/{serieId}/temporada", 'TemporadasController@index');
+Route::post("/series/{id}/editaNome", [SeriesController::class, "edit"])->name('editar_nome');

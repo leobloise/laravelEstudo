@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Episodio;
+use App\Http\Requests\DeleteFormRequest;
 use App\Http\Requests\SeriesFormRequest;
 use App\Serie;
+use App\Temporada;
 use App\Services\CriadorDeSerie;
+use App\Services\DeletorDeSerie;
 use Illuminate\Http\Request;
 
 class SeriesController extends Controller
@@ -44,13 +48,30 @@ class SeriesController extends Controller
         return redirect()->route('listar_series');
     }
 
-    public function destroy(Request $request)
+    public function edit(int $id, Request $request)
     {
-        Serie::destroy($request->id);
-        $request->session()
+        $novoNome = $request->nome;
+        $serie = Serie::find($id);
+        $serie->nome = $novoNome;
+        $serie->save();
+    }
+
+    public function destroy(Request $request, DeletorDeSerie $deletorDeSerie)
+    {
+        if($deletorDeSerie->remove($request->id)) {
+            $request->session()
             ->flash(
                 'mensagem',
                 "Série removida com sucesso"
+            );
+            return redirect()->route('listar_series');
+        } 
+        
+        $request
+        ->session()
+        ->flash(
+                'mensagem',
+                'Não foi possível deletar a série devido a um erro'
             );
         return redirect()->route('listar_series');
     }

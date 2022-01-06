@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Serie;
+use App\Temporada;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CriadorDeSerie
@@ -11,23 +13,28 @@ class CriadorDeSerie
     public function criarSerie(string $nome, int $qtdTemporadas, int $epPorTemporada)
     {   
 
-        try {
-            $serie = Serie::create(['nome'  => $nome]);
-        
-            for($i = 1; $i <= $qtdTemporadas; $i++) {
-                $temporada = $serie->temporadas()->create(['numero'  => $i]);
-                for($j = 1; $j < $epPorTemporada; $j++) {
-                    $temporada->episodios()->create(['numero'   => $j]);
-                }
-            }
+        DB::beginTransaction();
+        $serie = Serie::create(['nome'  => $nome]);
+        $this->createTemporada($serie, $qtdTemporadas, $epPorTemporada);
+        DB::commit();
 
-            return $serie;
+        return $serie;
 
-        } catch (Throwable $error) {
-            echo $error->getMessage();
-            return false;
-        } 
+    }
 
+    private function createTemporada(Serie $serie, int $qtdTemporadas, int $epPorTemporada) 
+    {
+        for($i = 1; $i <= $qtdTemporadas; $i++) {
+            $temporada = $serie->temporadas()->create(['numero'  => $i]);
+            $this->createEpisodio($epPorTemporada, $temporada);
+        }
+    }
+
+    private function createEpisodio(int $epPorTemporada, Temporada $temporada)
+    {
+        for($j = 1; $j < $epPorTemporada; $j++) {
+            $temporada->episodios()->create(['numero'   => $j]);
+        }
     }
 
 }
